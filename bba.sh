@@ -81,7 +81,12 @@ then
     install
 fi
                                                         
-
+if [ "$(has_arg "-i" "$@")" = true ]; then
+    install
+fi
+if [ "$(has_arg "--install" "$@")" = true ]; then
+    install
+fi
 
 
 red "STARTING DOMAIN ENUMARATION"
