@@ -19,6 +19,20 @@ function yellow {
     printf "${YELLOW}$@${NC}\n"
 }
 
+function has_arg() {
+    ARG="$1"
+    shift
+    while [[ "$#" -gt 0 ]]; do
+        if [ "$ARG" = "$1" ]; then
+            echo true
+            return
+        else
+            shift
+        fi
+    done
+    echo false
+}
+
 install() {
 	mkdir ~/tools
 	GO111MODULE=on go install github.com/projectdiscovery/httpx/cmd/httpx@latest
