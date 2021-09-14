@@ -19,6 +19,45 @@ function yellow {
     printf "${YELLOW}$@${NC}\n"
 }
 
+install() {
+	mkdir ~/tools
+	GO111MODULE=on go install github.com/projectdiscovery/httpx/cmd/httpx@latest
+	GO111MODULE=on go install github.com/projectdiscovery/nuclei/v2/cmd/nuclei@latest
+    GO111MODULE=on go install github.com/projectdiscovery/shuffledns/cmd/shuffledns@latest
+    GO111MODULE=on go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+    GO111MODULE=on go install github.com/tomnomnom/assetfinder@latest
+    GO111MODULE=on go install github.com/OWASP/Amass/v3/...@latest
+    GO111MODULE=on go install github.com/tomnomnom/waybackurls@latest
+    GO111MODULE=on go install github.com/ffuf/ffuf@latest
+    GO111MODULE=on go install github.com/tomnomnom/gf@latesthttp
+    GO111MODULE=on go install github.com/tomnomnom/unfurl@latest
+    GO111MODULE=on go install github.com/ffuf/ffuf@latest
+    #echo 'source ~/go/pkg/mod/github.com/tomnomnom/gf@v0.0.0-20200618134122-dcd4c361f9f5/gf-completion.bash' >> ~/.bashrc
+    #source ~/.bashrc
+    
+    cd ~/tools
+    git clone https://github.com/1ndianl33t/Gf-Patterns
+    mkdir  ~/.gf
+    mv Gf-Patterns/*.json ~/.gf
+    
+    sudo apt-get --assume-yes install git make gcc
+	git clone https://github.com/robertdavidgraham/masscan
+	cd masscan
+	make
+	sudo make install
+
+    
+    git clone https://github.com/blechschmidt/massdns.git
+    cd massdns && make && sudo make install
+    
+
+    wget https://github.com/findomain/findomain/releases/latest/download/findomain-linux
+    chmod +x findomain-linux
+    sudo cp findomain-linux /usr/local/bin
+    sudo apt install whatweb
+
+}
+
 
 yellow "▄▄▄▄· ▄• ▄▌ ▄▄ •     ▄▄▄▄·       ▄• ▄▌ ▐ ▄ ▄▄▄▄▄ ▄· ▄▌  "    
 yellow "▐█ ▀█▪█▪██▌▐█ ▀ ▪    ▐█ ▀█▪▪     █▪██▌•█▌▐█•██  ▐█▪██▌   "   
@@ -33,7 +72,11 @@ yellow " ▀  ▀  ▀▀▀  ▀▀▀  ▀█▄▀▪▀▀  █▪▀▀▀ 
 
 
 
-                                                         
+ if ! command -v whatweb &> /dev/null
+then
+    install
+fi
+                                                        
 
 
 
