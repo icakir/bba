@@ -2,44 +2,84 @@ domain=$1
 wordlist="/home/ap/need/wordlist.txt"
 reso="/home/ap/need/reso.txt"
 
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
+
+function red {
+    printf "${RED}$@${NC}\n"
+}
+
+function green {
+    printf "${GREEN}$@${NC}\n"
+}
+
+function yellow {
+    printf "${YELLOW}$@${NC}\n"
+}
 
 
+yellow "▄▄▄▄· ▄• ▄▌ ▄▄ •     ▄▄▄▄·       ▄• ▄▌ ▐ ▄ ▄▄▄▄▄ ▄· ▄▌  "    
+yellow "▐█ ▀█▪█▪██▌▐█ ▀ ▪    ▐█ ▀█▪▪     █▪██▌•█▌▐█•██  ▐█▪██▌   "   
+yellow "▐█▀▀█▄█▌▐█▌▄█ ▀█▄    ▐█▀▀█▄ ▄█▀▄ █▌▐█▌▐█▐▐▌ ▐█.▪▐█▌▐█▪    "  
+yellow "██▄▪▐█▐█▄█▌▐█▄▪▐█    ██▄▪▐█▐█▌.▐▌▐█▄█▌██▐█▌ ▐█▌· ▐█▀·.     " 
+yellow "·▀▀▀▀  ▀▀▀ ·▀▀▀▀     ·▀▀▀▀  ▀█▄▀▪ ▀▀▀ ▀▀ █▪ ▀▀▀   ▀ •       "
+yellow " ▄▄▄· ▄• ▄▌▄▄▄▄▄      • ▌ ▄ ·.  ▄▄▄· ▄▄▄▄▄▪         ▐ ▄     "
+yellow "▐█ ▀█ █▪██▌•██  ▪     ·██ ▐███▪▐█ ▀█ •██  ██ ▪     •█▌▐█    "
+yellow "▄█▀▀█ █▌▐█▌ ▐█.▪ ▄█▀▄ ▐█ ▌▐▌▐█·▄█▀▀█  ▐█.▪▐█· ▄█▀▄ ▐█▐▐▌    "
+yellow "▐█ ▪▐▌▐█▄█▌ ▐█▌·▐█▌.▐▌██ ██▌▐█▌▐█ ▪▐▌ ▐█▌·▐█▌▐█▌.▐▌██▐█▌    "
+yellow " ▀  ▀  ▀▀▀  ▀▀▀  ▀█▄▀▪▀▀  █▪▀▀▀ ▀  ▀  ▀▀▀ ▀▀▀ ▀█▄▀▪▀▀ █▪    "
+
+
+
+                                                         
+
+
+
+red "STARTING DOMAIN ENUMARATION"
 domain_enum(){
 
 mkdir -p $domain $domain/sources $domain/Recon  $domain/Recon/nuclei $domain/Recon/waybackurls  $domain/Recon/gf $domain/Recon/wordlist $domain/Recon/massscan
-
+whatweb $domain > $domain/sources/server.txt
 subfinder -d $domain -o $domain/sources/subfinder.txt
+cat $domain/sources/subfinder.txt | waybackurls | sort | uniq > $domain/sources/urls.txt
 findomain -t  $domain  --quiet | tee $domain/sources/findodmain.txt
 assetfinder -subs-only $domain | tee $domain/sources/assetfinder.txt
 amass enum  -passive -d $domain -o $domain/sources/passive.txt
 shuffledns  -d $domain -w $wordlist -r $reso -o $domain/sources/shuffledns.txt
+./googledorks.sh  $domain > $domain/sources/dorks.txt
 cat $domain/sources/*.txt > $domain/sources/all.txt
 
 }
 domain_enum
 
+red "STARTING TO RESOLVE DOMAINS"
 resolving_domains(){
 #resolve doamin using shuffle_dns
 shuffledns -d $domain -list $domain/sources/all.txt -o $domain/domains.txt  -r $reso
 }
 resolving_domains
 
+red "STARTING HTTP CHECK"
 http_prob(){
 #checking http /https
 cat $domain/domains.txt | httpx -threads 200 -o $domain/Recon/httpx.txt
 }
 http_prob
 
+red "STARTING VULN CHECK"
 scanner(){
 
 #cat $domain/Recon/httpx.txt |nuclei -t /home/ap/nuclei-templates/cves/ -c 50 -o $domain/Recon/nuclei/cves.txt
-cat $domain/Recon/httpx.txt |nuclei -t $nuc/files/ -c 50 -o $domain/Recon/nuclei/files.txt
+cat $domain/Recon/httpx.txt |nuclei -t $nuc/files/ -c 50 -o $domain/Recon/nuclei/files.txt -tags cve -severity critical,high,medium
 #cat $domain/Recon/httpx.txt |nuclei -t $nuc/vulnerabilities/ -c 50 -o $domain/Recon/nuclei/vulnerabilites.txt
 #cat $domain/Recon/httpx.txt |nuclei -t $nuc/technologies/ -c 50 -o $domain/Recon/nuclei/technologies.txt
 
 }
 scanner
 
+red "STARTING ARCHIVE URLS CHECK"
 wbs(){
 
 cat $domain/Recon/httpx.txt | waybackurls | tee $domain/Recon/waybackurls/waybackurls.txt
@@ -49,6 +89,7 @@ cat $domain/Recon/waybackurls/waybackurls.txt | egrep -v  "\.woff|\.ttf|\.eot|\.
 }
 wbs
 
+red "STARTING FUZZING"
 ff(){
 
 ffuf -c -u "FUZZ" -w  $domain/Recon/waybackurls/wbresolve.txt -of csv -o $domain/Recon/waybackurls/temp.txt
@@ -59,6 +100,7 @@ rm -rf $domain/Recon/waybackurls/temp.txt
 }
 ff
 
+red "STARTING XSS, SSRF SQLI CHECKS"
 gfp(){
 
 gf xss  $domain/Recon/waybackurls/valid.txt | tee  $domain/Recon/gf/gf.txt
@@ -75,6 +117,7 @@ cat $domain/Recon/waybackurls/valid.txt | unfurl -unique keys > $domain/Recon/wo
 }
 cw
 
+red "STARTING SCANNING"
 resolving(){
 
 massdns -r $reso  -t AAAA  -w $domain/Recon/massscan/results.txt   $domain/domains.txt
