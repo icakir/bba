@@ -43,7 +43,7 @@ install() {
     GO111MODULE=on go install github.com/OWASP/Amass/v3/...@latest
     GO111MODULE=on go install github.com/tomnomnom/waybackurls@latest
     GO111MODULE=on go install github.com/ffuf/ffuf@latest
-    GO111MODULE=on go install github.com/tomnomnom/gf@latesthttp
+    GO111MODULE=on go install github.com/tomnomnom/gf@latest
     GO111MODULE=on go install github.com/tomnomnom/unfurl@latest
     GO111MODULE=on go install github.com/ffuf/ffuf@latest
     #echo 'source ~/go/pkg/mod/github.com/tomnomnom/gf@v0.0.0-20200618134122-dcd4c361f9f5/gf-completion.bash' >> ~/.bashrc
