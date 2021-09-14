@@ -36,6 +36,10 @@ install() {
     #source ~/.bashrc
     
     cd ~/tools
+    
+    wget -o googledorks.sh https://raw.githubusercontent.com/IvanGlinkin/Fast-Google-Dorks-Scan/master/FGDS.sh
+    chmod +x googledorks.sh
+
     git clone https://github.com/1ndianl33t/Gf-Patterns
     mkdir  ~/.gf
     mv Gf-Patterns/*.json ~/.gf
@@ -72,7 +76,7 @@ yellow " ▀  ▀  ▀▀▀  ▀▀▀  ▀█▄▀▪▀▀  █▪▀▀▀ 
 
 
 
- if ! command -v whatweb &> /dev/null
+if ! command -v whatweb &> /dev/null
 then
     install
 fi
@@ -91,7 +95,7 @@ findomain -t  $domain  --quiet | tee $domain/sources/findodmain.txt
 assetfinder -subs-only $domain | tee $domain/sources/assetfinder.txt
 amass enum  -passive -d $domain -o $domain/sources/passive.txt
 shuffledns  -d $domain -w $wordlist -r $reso -o $domain/sources/shuffledns.txt
-./googledorks.sh  $domain > $domain/sources/dorks.txt
+~/tools/googledorks.sh  $domain > $domain/sources/dorks.txt
 cat $domain/sources/*.txt > $domain/sources/all.txt
 
 }
